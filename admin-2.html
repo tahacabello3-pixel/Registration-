@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الإدارة — تسجيلات الملتقى</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #1a56a0; --primary-dark: #133f7a; --primary-light: #e8f0fb;
+    --accent: #c8973a; --bg: #f3f4f6; --surface: #fff;
+    --border: #dde1e7; --text: #1f2937; --text-secondary: #4b5563;
+    --text-muted: #9ca3af; --error: #dc2626; --success: #15803d; --radius: 8px;
+  }
+  body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Login */
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px 36px; width: 100%; max-width: 380px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  .login-card .brand { text-align: center; margin-bottom: 28px; }
+  .login-card .brand h1 { font-family: 'Tajawal', sans-serif; font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+  .login-card .brand p { font-size: 13px; color: var(--text-muted); font-family: 'Tajawal', sans-serif; }
+  .login-card label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; font-family: 'Tajawal', sans-serif; }
+  .login-card input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 13px; font-family: 'Cairo', sans-serif; font-size: 14px; color: var(--text); outline: none; margin-bottom: 16px; transition: border-color 0.18s, box-shadow 0.18s; }
+  .login-card input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,160,0.12); }
+  .login-btn { width: 100%; padding: 11px; background: var(--primary); border: none; border-radius: var(--radius); color: #fff; font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.18s; }
+  .login-btn:hover { background: var(--primary-dark); }
+  .login-error { display: none; background: #fef2f2; border: 1px solid #fca5a5; color: var(--error); border-radius: var(--radius); padding: 10px 14px; font-size: 13px; font-family: 'Tajawal', sans-serif; margin-top: 12px; text-align: center; }
+
+  /* Dashboard */
+  #dashboard { display: none; }
+  .top-bar { background: var(--primary-dark); color: rgba(255,255,255,0.85); padding: 10px 24px; font-size: 12.5px; font-family: 'Tajawal', sans-serif; border-bottom: 3px solid var(--accent); display: flex; justify-content: space-between; align-items: center; }
+  .logout-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 14px; border-radius: 6px; font-family: 'Tajawal', sans-serif; font-size: 12px; cursor: pointer; transition: background 0.18s; }
+  .logout-btn:hover { background: rgba(255,255,255,0.22); }
+  .dash-header { background: var(--primary); color: #fff; padding: 24px; text-align: center; }
+  .dash-header h1 { font-family: 'Tajawal', sans-serif; font-size: 22px; font-weight: 700; }
+  .dash-header p { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 4px; }
+  .main { max-width: 1100px; margin: 28px auto; padding: 0 16px 60px; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; text-align: center; }
+  .stat-card .sval { font-size: 28px; font-weight: 700; color: var(--primary); font-family: 'Tajawal', sans-serif; line-height: 1; margin-bottom: 4px; }
+  .stat-card .slabel { font-size: 12px; color: var(--text-muted); font-family: 'Tajawal', sans-serif; }
+
+  /* Table */
+  .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-toolbar { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .table-toolbar h2 { font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
+  .toolbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tbtn { padding: 7px 14px; border-radius: 6px; font-family: 'Tajawal', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); transition: all 0.18s; }
+  .tbtn-gray { background: var(--bg); color: var(--text-secondary); }
+  .tbtn-gray:hover { background: #e5e7eb; }
+  .tbtn-blue { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .tbtn-blue:hover { background: var(--primary-dark); }
+  .tbtn-red { background: #fee2e2; color: var(--error); border-color: #fca5a5; }
+  .tbtn-red:hover { background: #fecaca; }
+  .tbtn-green { background: #dcfce7; color: #15803d; border-color: #86efac; }
+  .tbtn-green:hover { background: #bbf7d0; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 700px; }
+  thead { background: #f9fafb; }
+  th { padding: 11px 12px; text-align: right; font-size: 11px; font-weight: 700; color: var(--text-muted); font-family: 'Tajawal', sans-serif; letter-spacing: 0.04em; text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 11px 12px; font-size: 13px; border-bottom: 1px solid #f3f4f6; color: var(--text); font-family: 'Cairo', sans-serif; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f9fafb; }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 11.5px; font-weight: 700; font-family: 'Tajawal', sans-serif; }
+  .badge.confirmed { background: #dcfce7; color: #15803d; }
+  .badge.likely { background: #fef9c3; color: #854d0e; }
+  .badge.trying { background: #f3f4f6; color: #4b5563; }
+
+  .action-btns { display: flex; gap: 6px; }
+  .btn-edit, .btn-del { padding: 5px 10px; border-radius: 5px; font-family: 'Tajawal', sans-serif; font-size: 11.5px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-edit { background: var(--primary-light); color: var(--primary); }
+  .btn-edit:hover { background: #c7d9f3; }
+  .btn-del { background: #fee2e2; color: var(--error); }
+  .btn-del:hover { background: #fecaca; }
+
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); font-family: 'Tajawal', sans-serif; font-size: 14px; }
+  .loading { text-align: center; padding: 40px; color: var(--text-muted); font-family: 'Tajawal', sans-serif; font-size: 14px; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 12px; padding: 32px 28px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal h3 { font-family: 'Tajawal', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 20px; color: var(--primary); }
+  .modal label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; font-family: 'Tajawal', sans-serif; }
+  .modal input, .modal select, .modal textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 12px; font-family: 'Cairo', sans-serif; font-size: 13.5px; color: var(--text); outline: none; margin-bottom: 14px; transition: border-color 0.18s, box-shadow 0.18s; }
+  .modal input:focus, .modal select:focus, .modal textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,160,0.12); }
+  .modal textarea { resize: vertical; min-height: 72px; }
+  .modal select { cursor: pointer; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .btn-save { flex: 1; padding: 10px; background: var(--primary); border: none; border-radius: var(--radius); color: #fff; font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.18s; }
+  .btn-save:hover { background: var(--primary-dark); }
+  .btn-cancel { flex: 1; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-secondary); font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-cancel:hover { background: #e5e7eb; }
+
+  /* Confirm delete modal */
+  .confirm-modal { background: var(--surface); border-radius: 12px; padding: 28px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .confirm-modal p { font-family: 'Tajawal', sans-serif; font-size: 15px; color: var(--text); margin-bottom: 20px; line-height: 1.6; }
+  .confirm-modal .name-highlight { font-weight: 700; color: var(--error); }
+  .confirm-actions { display: flex; gap: 10px; }
+  .btn-confirm-del { flex: 1; padding: 10px; background: var(--error); border: none; border-radius: var(--radius); color: #fff; font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 11px 22px; border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 13.5px; font-weight: 600; z-index: 200; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+
+  /* Print / PDF styles */
+  @media print {
+    .top-bar, .dash-header, .toolbar-actions, .action-btns, .stats { display: none !important; }
+    body { background: #fff; }
+    .main { margin: 0; padding: 0; }
+    .table-card { border: none; box-shadow: none; }
+    .table-toolbar { border-bottom: 2px solid #000; padding: 0 0 10px; }
+    .table-toolbar h2 { font-size: 16px; }
+    td, th { font-size: 12px; padding: 8px; }
+    .print-header { display: block !important; text-align: center; margin-bottom: 16px; font-family: 'Tajawal', sans-serif; }
+    .print-header h2 { font-size: 18px; font-weight: 700; }
+    .print-header p { font-size: 12px; color: #555; margin-top: 4px; }
+  }
+  .print-header { display: none; }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .login-card { padding: 28px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="brand">
+      <h1>لوحة الإدارة</h1>
+      <p>الملتقى الجامعي التعريفي 2026</p>
+    </div>
+    <label for="passInput">كلمة المرور</label>
+    <input type="password" id="passInput" placeholder="أدخل كلمة المرور" onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">دخول</button>
+    <div class="login-error" id="loginError">كلمة المرور غير صحيحة</div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <div class="top-bar">
+    <span>الاتحاد العام لطلبة الجامعة — كلية طب الأسنان</span>
+    <button class="logout-btn" onclick="logout()">خروج</button>
+  </div>
+  <div class="dash-header">
+    <h1>بيانات المسجلين</h1>
+    <p>الملتقى الجامعي التعريفي — الخميس 11 يونيو 2026</p>
+  </div>
+
+  <div class="main">
+    <div class="stats">
+      <div class="stat-card"><div class="sval" id="statTotal">—</div><div class="slabel">إجمالي المسجلين</div></div>
+      <div class="stat-card"><div class="sval" id="statConfirmed">—</div><div class="slabel">مؤكد</div></div>
+      <div class="stat-card"><div class="sval" id="statLikely">—</div><div class="slabel">محتمل</div></div>
+      <div class="stat-card"><div class="sval" id="statTrying">—</div><div class="slabel">سيحاول</div></div>
+    </div>
+
+    <div class="table-card">
+      <div class="print-header">
+        <h2>قائمة المسجلين — الملتقى الجامعي التعريفي 2026</h2>
+        <p>الاتحاد العام لطلبة الجامعة — كلية طب الأسنان</p>
+      </div>
+      <div class="table-toolbar">
+        <h2>قائمة المسجلين</h2>
+        <div class="toolbar-actions">
+          <button class="tbtn tbtn-gray" onclick="loadData()">تحديث</button>
+          <button class="tbtn tbtn-green" onclick="exportCSV()">تصدير CSV</button>
+          <button class="tbtn tbtn-blue" onclick="exportPDF()">تصدير PDF</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الاسم الثلاثي</th>
+              <th>رقم القيد</th>
+              <th>رقم الهاتف</th>
+              <th>الحضور</th>
+              <th>ملاحظات</th>
+              <th>تاريخ التسجيل</th>
+              <th>الوقت</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="9" class="loading">جارٍ تحميل البيانات...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>تعديل بيانات المسجّل</h3>
+    <input type="hidden" id="editId">
+    <label>الاسم الثلاثي</label>
+    <input type="text" id="editName" placeholder="الاسم الثلاثي">
+    <label>رقم القيد</label>
+    <input type="text" id="editStudentId" placeholder="رقم القيد">
+    <label>رقم الهاتف</label>
+    <input type="tel" id="editPhone" placeholder="رقم الهاتف">
+    <label>حالة الحضور</label>
+    <select id="editAttendance">
+      <option value="confirmed">مؤكد</option>
+      <option value="likely">محتمل</option>
+      <option value="trying">سيحاول</option>
+    </select>
+    <label>ملاحظات</label>
+    <textarea id="editNotes" placeholder="ملاحظات..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveEdit()">حفظ التعديلات</button>
+      <button class="btn-cancel" onclick="closeEdit()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="confirm-modal">
+    <p>هل أنت متأكد من حذف تسجيل<br><span class="name-highlight" id="deleteName"></span>؟<br>لا يمكن التراجع عن هذا الإجراء.</p>
+    <div class="confirm-actions">
+      <button class="btn-confirm-del" onclick="confirmDelete()">حذف</button>
+      <button class="btn-cancel" style="flex:1;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-family:'Tajawal',sans-serif;font-size:14px;font-weight:600;cursor:pointer;" onclick="closeDelete()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL = 'https://yswynrvawbitvuwepucr.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_0EwUg9bRqXMkmXlMy3SKkw_IRjXvooN';
+  const ADMIN_PASS = 'dental2026';
+  const attendLabels = { confirmed: 'مؤكد', likely: 'محتمل', trying: 'سيحاول' };
+
+  let allData = [];
+  let deleteTargetId = null;
+
+  // ── Auth ──
+  function login() {
+    if (document.getElementById('passInput').value === ADMIN_PASS) {
+      document.getElementById('loginWrap').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      loadData();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }
+  function logout() {
+    document.getElementById('passInput').value = '';
+    document.getElementById('loginWrap').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'none';
+  }
+
+  // ── Data ──
+  async function loadData() {
+    document.getElementById('tableBody').innerHTML = '<tr><td colspan="9" class="loading">جارٍ تحميل البيانات...</td></tr>';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/registrations?select=*&order=created_at.desc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      allData = await res.json();
+      renderTable(allData);
+      renderStats(allData);
+    } catch {
+      document.getElementById('tableBody').innerHTML = '<tr><td colspan="9" class="empty-state">فشل تحميل البيانات.</td></tr>';
+    }
+  }
+
+  function renderStats(data) {
+    document.getElementById('statTotal').textContent = data.length;
+    document.getElementById('statConfirmed').textContent = data.filter(r => r.attendance_status === 'confirmed').length;
+    document.getElementById('statLikely').textContent = data.filter(r => r.attendance_status === 'likely').length;
+    document.getElementById('statTrying').textContent = data.filter(r => r.attendance_status === 'trying').length;
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    if (!data.length) { tbody.innerHTML = '<tr><td colspan="9" class="empty-state">لا توجد تسجيلات حتى الآن</td></tr>'; return; }
+    tbody.innerHTML = data.map((r, i) => `
+      <tr>
+        <td style="color:var(--text-muted);font-size:12px">${i+1}</td>
+        <td style="font-weight:600">${r.full_name||'—'}</td>
+        <td>${r.student_id||'—'}</td>
+        <td style="direction:ltr;text-align:right">${r.phone||'—'}</td>
+        <td><span class="badge ${r.attendance_status}">${attendLabels[r.attendance_status]||r.attendance_status}</span></td>
+        <td style="color:var(--text-muted);font-size:12px;max-width:140px">${r.notes||'—'}</td>
+        <td style="color:var(--text-muted);font-size:12px;white-space:nowrap">${formatDate(r.created_at)}</td>
+        <td style="color:var(--text-muted);font-size:12px;white-space:nowrap">${formatTime(r.created_at)}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn-edit" onclick="openEdit('${r.id}')">تعديل</button>
+            <button class="btn-del" onclick="openDelete('${r.id}','${(r.full_name||'').replace(/'/g,"\\'")}')">حذف</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('ar-LY', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  function formatTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  function formatFull(iso) {
+    if (!iso) return '—';
+    return formatDate(iso) + ' ' + formatTime(iso);
+  }
+
+  // ── Edit ──
+  function openEdit(id) {
+    const r = allData.find(x => x.id === id);
+    if (!r) return;
+    document.getElementById('editId').value = r.id;
+    document.getElementById('editName').value = r.full_name || '';
+    document.getElementById('editStudentId').value = r.student_id || '';
+    document.getElementById('editPhone').value = r.phone || '';
+    document.getElementById('editAttendance').value = r.attendance_status || 'confirmed';
+    document.getElementById('editNotes').value = r.notes || '';
+    document.getElementById('editModal').classList.add('open');
+  }
+  function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
+
+  async function saveEdit() {
+    const id = document.getElementById('editId').value;
+    const payload = {
+      full_name: document.getElementById('editName').value.trim(),
+      student_id: document.getElementById('editStudentId').value.trim(),
+      phone: document.getElementById('editPhone').value.trim(),
+      attendance_status: document.getElementById('editAttendance').value,
+      notes: document.getElementById('editNotes').value.trim() || null
+    };
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/registrations?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        closeEdit();
+        showToast('تم حفظ التعديلات بنجاح');
+        await loadData();
+      } else {
+        showToast('فشل الحفظ، حاول مجدداً');
+      }
+    } catch { showToast('خطأ في الاتصال'); }
+  }
+
+  // ── Delete ──
+  function openDelete(id, name) {
+    deleteTargetId = id;
+    document.getElementById('deleteName').textContent = name;
+    document.getElementById('deleteModal').classList.add('open');
+  }
+  function closeDelete() { document.getElementById('deleteModal').classList.remove('open'); deleteTargetId = null; }
+
+  async function confirmDelete() {
+    if (!deleteTargetId) return;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/registrations?id=eq.${deleteTargetId}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      if (res.ok) {
+        closeDelete();
+        showToast('تم حذف التسجيل');
+        await loadData();
+      } else { showToast('فشل الحذف'); }
+    } catch { showToast('خطأ في الاتصال'); }
+  }
+
+  // ── Export CSV ──
+  function exportCSV() {
+    if (!allData.length) return;
+    const headers = ['الاسم الثلاثي','رقم القيد','رقم الهاتف','الحضور','ملاحظات','تاريخ التسجيل','وقت التسجيل'];
+    const rows = allData.map(r => [
+      r.full_name, r.student_id, r.phone,
+      attendLabels[r.attendance_status]||r.attendance_status,
+      r.notes||'', formatDate(r.created_at), formatTime(r.created_at)
+    ]);
+    const csv = '\uFEFF' + [headers,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'تسجيلات_الملتقى.csv';
+    a.click();
+  }
+
+  // ── Export PDF (print) ──
+  function exportPDF() { window.print(); }
+
+  // ── Toast ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Close modals on overlay click
+  document.getElementById('editModal').addEventListener('click', function(e){ if(e.target===this) closeEdit(); });
+  document.getElementById('deleteModal').addEventListener('click', function(e){ if(e.target===this) closeDelete(); });
+
+  // Add policy for update/delete — needed in Supabase
+  // ALTER TABLE registrations ENABLE ROW LEVEL SECURITY;
+  // CREATE POLICY "allow all for anon" ON registrations FOR ALL TO anon USING (true) WITH CHECK (true);
+</script>
+</body>
+</html>
