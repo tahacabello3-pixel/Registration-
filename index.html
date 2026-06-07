@@ -478,6 +478,19 @@
           </div>
         </div>
 
+        <div class="field" style="margin-top:20px;margin-bottom:0">
+          <label for="academic_year">السنة الدراسية <span class="req">*</span></label>
+          <select id="academic_year" required>
+            <option value="" disabled selected>اختر السنة الدراسية</option>
+            <option value="first">السنة الأولى</option>
+            <option value="second">السنة الثانية</option>
+            <option value="third">السنة الثالثة</option>
+            <option value="fourth">السنة الرابعة</option>
+            <option value="external">خارج الكلية</option>
+            <option value="graduate">خريج</option>
+          </select>
+        </div>
+
 
       </div>
     </div>
@@ -566,9 +579,10 @@
     const name = document.getElementById('name').value.trim();
     const student_id = document.getElementById('student_id').value.trim();
     const phone = document.getElementById('phone').value.trim();
+    const academic_year = document.getElementById('academic_year').value;
     const attendance = document.querySelector('input[name="attendance"]:checked');
 
-    if (!name || !student_id || !phone || !attendance) {
+    if (!name || !student_id || !phone || !academic_year || !attendance) {
       showError('يُرجى تعبئة جميع الحقول الإلزامية المعلّمة بنجمة.');
       return;
     }
@@ -581,6 +595,7 @@
       full_name: name,
       student_id: student_id,
       phone: phone,
+      academic_year: academic_year,
       attendance_status: attendance.value,
       notes: document.getElementById('notes').value.trim() || null,
       created_at: new Date().toISOString()
