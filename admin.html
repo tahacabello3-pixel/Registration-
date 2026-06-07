@@ -442,7 +442,27 @@
   }
 
   // ── Export PDF (print) ──
-  function exportPDF() { window.print(); }
+  function exportPDF() {
+    const tbody = document.getElementById('tableBody');
+    const saved = tbody.innerHTML;
+    const sorted = [...allData].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    tbody.innerHTML = sorted.map((r, i) => `
+      <tr>
+        <td style="color:var(--text-muted);font-size:12px">${i+1}</td>
+        <td style="font-weight:600">${r.full_name||'—'}</td>
+        <td>${r.student_id||'—'}</td>
+        <td style="direction:ltr;text-align:right">${r.phone||'—'}</td>
+        <td style="font-size:12.5px">${yearLabels[r.academic_year]||r.academic_year||'—'}</td>
+        <td><span class="badge ${r.attendance_status}">${attendLabels[r.attendance_status]||r.attendance_status}</span></td>
+        <td style="color:var(--text-muted);font-size:12px;max-width:140px">${r.notes||'—'}</td>
+        <td style="color:var(--text-muted);font-size:12px;white-space:nowrap">${formatDate(r.created_at)}</td>
+        <td style="color:var(--text-muted);font-size:12px;white-space:nowrap">${formatTime(r.created_at)}</td>
+        <td></td>
+      </tr>
+    `).join('');
+    window.print();
+    tbody.innerHTML = saved;
+  }
 
   // ── Toast ──
   function showToast(msg) {
