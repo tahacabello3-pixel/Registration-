@@ -184,6 +184,7 @@
             <option value="graduate">خريج</option>
           </select>
           <button class="tbtn tbtn-gray" onclick="loadData()">تحديث</button>
+          <button class="tbtn tbtn-gray" onclick="copyAll()" id="copyBtn">نسخ الكل</button>
           <button class="tbtn tbtn-green" onclick="exportCSV()">تصدير CSV</button>
           <button class="tbtn tbtn-blue" onclick="exportPDF()">تصدير PDF</button>
         </div>
@@ -446,6 +447,21 @@
     a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
     a.download = 'تسجيلات_الملتقى.csv';
     a.click();
+  }
+
+  // ── Copy All ──
+  function copyAll() {
+    if (!allData.length) { showToast('لا توجد بيانات للنسخ'); return; }
+    const lines = allData.map((r, i) =>
+      `${i+1}. ${r.full_name||'—'} | القيد: ${r.student_id||'—'} | الهاتف: ${r.phone||'—'} | ${yearLabels[r.academic_year]||'—'} | ${attendLabels[r.attendance_status]||'—'}${r.notes ? ' | '+r.notes : ''}`
+    );
+    const text = `قائمة المسجلين — الملتقى الجامعي التعريفي 2026\nالإجمالي: ${allData.length} مسجّل\n\n` + lines.join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'تم النسخ';
+      showToast('تم نسخ بيانات ' + allData.length + ' مسجّل');
+      setTimeout(() => btn.textContent = 'نسخ الكل', 2000);
+    }).catch(() => showToast('فشل النسخ'));
   }
 
   // ── Export PDF (print) ──
